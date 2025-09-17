@@ -67,12 +67,14 @@ namespace ITSystem.Services
             while (true)
             {
                 Console.WriteLine();
-                Console.WriteLine("=== IT-system: Orderhantering ===");
-                Console.WriteLine("1) Lista produkter");
-                Console.WriteLine("2) Skapa ny order");
-                Console.WriteLine("3) Lista ordrar");
-                Console.WriteLine("0) Avsluta");
-                Console.Write("Välj: ");
+                Console.WriteLine("╔══════════════════════════════════════════╗");
+                Console.WriteLine("║   Rabar Tech – Beställningscentral       ║");
+                Console.WriteLine("╚══════════════════════════════════════════╝");
+                Console.WriteLine("[1] Visa produktkatalog");
+                Console.WriteLine("[2] Skapa kundorder");
+                Console.WriteLine("[3] Orderöversikt");
+                Console.WriteLine("[0] Avsluta (till skrivbordet)");
+                Console.Write("Välj ett alternativ: ");
                 var choice = Console.ReadLine();
 
                 switch (choice)

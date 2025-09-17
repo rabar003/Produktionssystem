@@ -91,9 +91,15 @@ namespace ITSystem.Services
         private void ListProducts()
         {
             Console.WriteLine("\n— Produkter —");
-            foreach (var p in dbContext.Products.OrderBy(p => p.Id))
-                Console.WriteLine($"Id:{p.Id} | {p.Name} | {p.Description} | {p.Price} kr");
+            var products = dbContext.Products.OrderBy(p => p.Id).ToList();
+
+            for (int i = 0; i < products.Count; i++)
+            {
+                var p = products[i];
+                Console.WriteLine($"Nr:{i + 1} (Id:{p.Id}) | {p.Name} | {p.Description} | {p.Price} kr");
+            }
         }
+
 
         private void CreateOrder()
         {
@@ -103,19 +109,45 @@ namespace ITSystem.Services
 
             while (true)
             {
-                ListProducts();
+                // Hämta och visa samma ordning varje varv
+                var products = dbContext.Products.OrderBy(p => p.Id).ToList();
 
-                Console.Write("Produkt-Id (ENTER för klar): ");
+                Console.WriteLine("\n— Produkter —");
+                for (int i = 0; i < products.Count; i++)
+                {
+                    var p = products[i];
+                    Console.WriteLine($"Nr:{i + 1} (Id:{p.Id}) | {p.Name} | {p.Description} | {p.Price} kr");
+                }
+
+                Console.Write("Ange Nr eller Id (ENTER för klar): ");
                 var s = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(s)) break;
 
-                if (!int.TryParse(s, out var pid)) { Console.WriteLine("Fel Id."); continue; }
-                var product = dbContext.Products.FirstOrDefault(p => p.Id == pid);
-                if (product == null) { Console.WriteLine("Produkt finns ej."); continue; }
+                if (!int.TryParse(s, out var sel))
+                {
+                    Console.WriteLine("Fel inmatning.");
+                    continue;
+                }
+
+                // 1) Försök tolka som riktigt Id
+                var product = products.FirstOrDefault(p => p.Id == sel);
+
+                // 2) Om ej träff – tolka som visningsnummer (Nr)
+                if (product == null && sel >= 1 && sel <= products.Count)
+                    product = products[sel - 1];
+
+                if (product == null)
+                {
+                    Console.WriteLine("Produkt finns ej.");
+                    continue;
+                }
 
                 Console.Write("Antal: ");
                 if (!int.TryParse(Console.ReadLine(), out var qty) || qty <= 0)
-                { Console.WriteLine("Fel antal."); continue; }
+                {
+                    Console.WriteLine("Fel antal.");
+                    continue;
+                }
 
                 order.Items.Add(new OrderItem
                 {
@@ -127,12 +159,17 @@ namespace ITSystem.Services
                 Console.WriteLine($"+ {qty} x {product.Name} tillagd.");
             }
 
-            if (order.Items.Count == 0) { Console.WriteLine("Ingen rad lades till."); return; }
+            if (order.Items.Count == 0)
+            {
+                Console.WriteLine("Ingen rad lades till.");
+                return;
+            }
 
             dbContext.Orders.Add(order);
             dbContext.SaveChanges();
             Console.WriteLine($"Order #{order.Id} skapad med {order.Items.Count} rader.");
         }
+
 
         private void ListOrders()
         {
